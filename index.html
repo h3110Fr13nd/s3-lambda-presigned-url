@@ -159,6 +159,68 @@
             background-color: #feeeed;
             border-left: 4px solid #e53e3e;
         }
+        .response-card {
+            background-color: #f0f4ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+            border-left: 4px solid #4a6bdf;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .response-field {
+            margin-bottom: 15px;
+        }
+        
+        .response-field-label {
+            font-weight: 500;
+            font-size: 14px;
+            color: #4a6bdf;
+            margin-bottom: 5px;
+        }
+        
+        .response-field-value {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #e1e4e8;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        
+        .copy-btn {
+            background-color: #edf2ff;
+            border: 1px solid #d5e0ff;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 10px;
+            color: #4a6bdf;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background-color: #d5e0ff;
+        }
+        
+        .url-button {
+            display: inline-block;
+            margin-top: 10px;
+            background-color: #4a6bdf;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .url-button:hover {
+            background-color: #3a5bcc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(74, 107, 223, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -239,7 +301,7 @@
                     uploadLoader.style.display = "none";
                     
                     if (data.message) {
-                        showMessage(data.message, "success");
+                        displaySuccessResponse(data);
                     } else if (data.error) {
                         showMessage(data.error, "error");
                     }
@@ -277,8 +339,7 @@
                 urlLoader.style.display = "none";
                 
                 if (data.presignedUrl) {
-                    messageEl.className = "success";
-                    messageEl.innerHTML = `<strong>Success!</strong><br><a href="${data.presignedUrl}" target="_blank">Click here to access your file</a>`;
+                    displayPresignedUrlResponse(data);
                 } else {
                     showMessage(data.error, "error");
                 }
@@ -288,10 +349,128 @@
             }
         }
         
+        function displaySuccessResponse(data) {
+            const messageEl = document.getElementById("message");
+            messageEl.innerHTML = '';
+            
+            const responseCard = document.createElement('div');
+            responseCard.className = 'response-card';
+            
+            // Success message
+            const messageField = document.createElement('div');
+            messageField.className = 'response-field';
+            messageField.innerHTML = `
+                <div class="response-field-label">Status</div>
+                <div class="response-field-value" style="color: #38a169; font-weight: 500;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38a169" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    ${data.message}
+                </div>
+            `;
+            responseCard.appendChild(messageField);
+            
+            // File key
+            if (data.fileKey) {
+                const fileKeyField = document.createElement('div');
+                fileKeyField.className = 'response-field';
+                fileKeyField.innerHTML = `
+                    <div class="response-field-label">File Key</div>
+                    <div class="response-field-value">
+                        ${data.fileKey}
+                        <button class="copy-btn" onclick="copyToClipboard('${data.fileKey}')">Copy</button>
+                    </div>
+                `;
+                responseCard.appendChild(fileKeyField);
+            }
+            
+            // Presigned URL
+            if (data.presignedUrl) {
+                const urlField = document.createElement('div');
+                urlField.className = 'response-field';
+                urlField.innerHTML = `
+                    <div class="response-field-label">Presigned URL</div>
+                    <div class="response-field-value">
+                        ${truncateUrl(data.presignedUrl)}
+                        <button class="copy-btn" onclick="copyToClipboard('${data.presignedUrl}')">Copy</button>
+                    </div>
+                    <a href="${data.presignedUrl}" target="_blank" class="url-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        Open File
+                    </a>
+                `;
+                responseCard.appendChild(urlField);
+            }
+            
+            messageEl.appendChild(responseCard);
+        }
+        
+        function displayPresignedUrlResponse(data) {
+            const messageEl = document.getElementById("message");
+            messageEl.innerHTML = '';
+            
+            const responseCard = document.createElement('div');
+            responseCard.className = 'response-card';
+            
+            // Success message
+            const messageField = document.createElement('div');
+            messageField.className = 'response-field';
+            messageField.innerHTML = `
+                <div class="response-field-label">Status</div>
+                <div class="response-field-value" style="color: #38a169; font-weight: 500;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38a169" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    Presigned URL generated successfully
+                </div>
+            `;
+            responseCard.appendChild(messageField);
+            
+            // File name
+            const fileName = document.getElementById("fileNameInput").value;
+            const fileNameField = document.createElement('div');
+            fileNameField.className = 'response-field';
+            fileNameField.innerHTML = `
+                <div class="response-field-label">File Name</div>
+                <div class="response-field-value">
+                    ${fileName}
+                </div>
+            `;
+            responseCard.appendChild(fileNameField);
+            
+            // Presigned URL
+            const urlField = document.createElement('div');
+            urlField.className = 'response-field';
+            urlField.innerHTML = `
+                <div class="response-field-label">Presigned URL</div>
+                <div class="response-field-value">
+                    ${truncateUrl(data.presignedUrl)}
+                    <button class="copy-btn" onclick="copyToClipboard('${data.presignedUrl}')">Copy</button>
+                </div>
+                <a href="${data.presignedUrl}" target="_blank" class="url-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    Open File
+                </a>
+            `;
+            responseCard.appendChild(urlField);
+            
+            messageEl.appendChild(responseCard);
+        }
+        
         function showMessage(message, type) {
             const messageEl = document.getElementById("message");
             messageEl.textContent = message;
             messageEl.className = type;
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Could show a small tooltip here
+                alert('Copied to clipboard');
+            });
+        }
+        
+        function truncateUrl(url) {
+            if (url.length > 60) {
+                return url.substring(0, 30) + '...' + url.substring(url.length - 25);
+            }
+            return url;
         }
     </script>
 </body>
