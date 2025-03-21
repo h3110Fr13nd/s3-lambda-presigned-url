@@ -4,68 +4,294 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>S3 File Upload & Presigned URL</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap">
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .container { max-width: 500px; margin: auto; }
-        input, button { margin: 10px 0; padding: 10px; width: 100%; }
-        #message { margin-top: 20px; font-weight: bold; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; 
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        .container { 
+            max-width: 600px; 
+            width: 90%;
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        h2 { 
+            color: #4a6bdf;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: #4a6bdf;
+            border-radius: 3px;
+        }
+        h2:first-child {
+            margin-top: 0;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .file-input-label {
+            display: block;
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        .file-input-label:hover {
+            border-color: #4a6bdf;
+            background-color: #f0f4ff;
+        }
+        .file-input-label span {
+            display: block;
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+        .selected-file {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #555;
+            font-style: italic;
+        }
+        input[type="text"] { 
+            margin: 0 0 15px 0; 
+            padding: 12px 15px; 
+            width: 100%; 
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 15px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4a6bdf;
+            box-shadow: 0 0 0 2px rgba(74, 107, 223, 0.2);
+        }
+        button { 
+            margin: 0; 
+            padding: 12px 20px; 
+            width: 100%; 
+            background-color: #4a6bdf; 
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        button:hover {
+            background-color: #3a5bcc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(74, 107, 223, 0.2);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        #message { 
+            margin-top: 25px; 
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            font-weight: normal;
+            word-break: break-all;
+        }
+        #message a {
+            color: #4a6bdf;
+            text-decoration: none;
+        }
+        #message a:hover {
+            text-decoration: underline;
+        }
+        .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .button-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .success {
+            background-color: #e7f5ea;
+            border-left: 4px solid #38a169;
+        }
+        .error {
+            background-color: #feeeed;
+            border-left: 4px solid #e53e3e;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Upload File to S3</h2>
-        <input type="file" id="fileInput">
-        <button onclick="uploadFile()">Upload</button>
+        <div class="input-group">
+            <label for="fileInput" class="file-input-label">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <span>Click to select a file</span>
+            </label>
+            <input type="file" id="fileInput">
+            <div class="selected-file" id="selectedFileName">No file selected</div>
+            <button onclick="uploadFile()">
+                <div class="button-content">
+                    <div class="loader" id="uploadLoader"></div>
+                    <span>Upload to S3</span>
+                </div>
+            </button>
+        </div>
+        
         <h2>Get Presigned URL</h2>
-        <input type="text" id="fileNameInput" placeholder="Enter file name">
-        <button onclick="getPresignedUrl()">Get URL</button>
-        <p id="message"></p>
+        <div class="input-group">
+            <input type="text" id="fileNameInput" placeholder="Enter file name">
+            <button onclick="getPresignedUrl()">
+                <div class="button-content">
+                    <div class="loader" id="urlLoader"></div>
+                    <span>Generate Presigned URL</span>
+                </div>
+            </button>
+        </div>
+        
+        <div id="message"></div>
     </div>
+    
     <script>
         const API_URL = "https://qag7xtwnkckns6hkh7uwuer2cy0hgrro.lambda-url.us-east-1.on.aws/";
         
+        // Update file input display
+        document.getElementById('fileInput').addEventListener('change', function() {
+            const fileName = this.files[0] ? this.files[0].name : "No file selected";
+            document.getElementById('selectedFileName').textContent = fileName;
+        });
+        
         async function uploadFile() {
             const fileInput = document.getElementById("fileInput");
+            const uploadLoader = document.getElementById("uploadLoader");
+            const messageEl = document.getElementById("message");
+            
             if (!fileInput.files.length) {
-                alert("Please select a file");
+                showMessage("Please select a file", "error");
                 return;
             }
+            
+            // Show loader
+            uploadLoader.style.display = "block";
+            messageEl.textContent = "";
+            messageEl.className = "";
+            
             const file = fileInput.files[0];
             const reader = new FileReader();
             reader.readAsDataURL(file);
+            
             reader.onload = async () => {
-                const base64String = reader.result.split(",")[1];
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        action: "upload",
-                        fileContent: base64String,
-                        fileName: file.name
-                    })
-                });
-                const data = await response.json();
-                document.getElementById("message").textContent = data.message || data.error;
+                try {
+                    const base64String = reader.result.split(",")[1];
+                    const response = await fetch(API_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            action: "upload",
+                            fileContent: base64String,
+                            fileName: file.name
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    // Hide loader
+                    uploadLoader.style.display = "none";
+                    
+                    if (data.message) {
+                        showMessage(data.message, "success");
+                    } else if (data.error) {
+                        showMessage(data.error, "error");
+                    }
+                } catch (error) {
+                    uploadLoader.style.display = "none";
+                    showMessage("An error occurred: " + error.message, "error");
+                }
             };
         }
         
         async function getPresignedUrl() {
             const fileName = document.getElementById("fileNameInput").value;
+            const urlLoader = document.getElementById("urlLoader");
+            const messageEl = document.getElementById("message");
+            
             if (!fileName) {
-                alert("Please enter a file name");
+                showMessage("Please enter a file name", "error");
                 return;
             }
-            const response = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action: "get_presigned_url", fileName })
-            });
-            const data = await response.json();
-            if (data.presignedUrl) {
-                document.getElementById("message").innerHTML = `Presigned URL: <a href="${data.presignedUrl}" target="_blank">${data.presignedUrl}</a>`;
-            } else {
-                document.getElementById("message").textContent = data.error;
+            
+            // Show loader
+            urlLoader.style.display = "block";
+            messageEl.textContent = "";
+            messageEl.className = "";
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "get_presigned_url", fileName })
+                });
+                
+                const data = await response.json();
+                // Hide loader
+                urlLoader.style.display = "none";
+                
+                if (data.presignedUrl) {
+                    messageEl.className = "success";
+                    messageEl.innerHTML = `<strong>Success!</strong><br><a href="${data.presignedUrl}" target="_blank">Click here to access your file</a>`;
+                } else {
+                    showMessage(data.error, "error");
+                }
+            } catch (error) {
+                urlLoader.style.display = "none";
+                showMessage("An error occurred: " + error.message, "error");
             }
+        }
+        
+        function showMessage(message, type) {
+            const messageEl = document.getElementById("message");
+            messageEl.textContent = message;
+            messageEl.className = type;
         }
     </script>
 </body>
