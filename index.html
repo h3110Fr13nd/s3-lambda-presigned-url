@@ -209,17 +209,24 @@
             margin-top: 10px;
             background-color: #4a6bdf;
             color: white;
-            padding: 8px 15px;
+            padding: 10px 16px;
             border-radius: 5px;
             text-decoration: none;
             font-size: 14px;
             transition: all 0.2s;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(74, 107, 223, 0.3);
         }
         
         .url-button:hover {
             background-color: #3a5bcc;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(74, 107, 223, 0.2);
+            box-shadow: 0 4px 8px rgba(74, 107, 223, 0.4);
+        }
+        
+        .url-button svg {
+            vertical-align: middle;
+            margin-right: 6px;
         }
     </style>
 </head>
@@ -393,8 +400,8 @@
                         <button class="copy-btn" onclick="copyToClipboard('${data.presignedUrl}')">Copy</button>
                     </div>
                     <a href="${data.presignedUrl}" target="_blank" class="url-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                        Open File
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        OPEN FILE
                     </a>
                 `;
                 responseCard.appendChild(urlField);
@@ -444,8 +451,8 @@
                     <button class="copy-btn" onclick="copyToClipboard('${data.presignedUrl}')">Copy</button>
                 </div>
                 <a href="${data.presignedUrl}" target="_blank" class="url-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                    Open File
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    OPEN FILE
                 </a>
             `;
             responseCard.appendChild(urlField);
