@@ -229,37 +229,6 @@
             vertical-align: middle;
             margin-right: 6px;
         }
-
-        .file-list {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        
-        .file-list-item {
-            padding: 10px;
-            border-bottom: 1px solid #e1e4e8;
-        }
-        
-        .file-list-item:last-child {
-            border-bottom: none;
-        }
-        
-        .file-list-item a {
-            color: #4a6bdf;
-            text-decoration: none;
-        }
-        
-        .file-list-item a:hover {
-            text-decoration: underline;
-        }
-        
-        .file-list-item span {
-            font-size: 14px;
-            color: #555;
-        }
     </style>
 </head>
 <body>
@@ -290,19 +259,6 @@
                 </div>
             </button>
         </div>
-
-        <h2>List Files in S3</h2>
-        <div class="input-group">
-            <input type="text" id="prefixInput" placeholder="Enter prefix (optional)">
-            <button onclick="listFiles()">
-                <div class="button-content">
-                    <div class="loader" id="listLoader"></div>
-                    <span>List Files</span>
-                </div>
-            </button>
-        </div>
-        
-        <div id="fileList" class="file-list"></div>
         
         <div id="message"></div>
     </div>
@@ -398,63 +354,6 @@
             } catch (error) {
                 urlLoader.style.display = "none";
                 showMessage("An error occurred: " + error.message, "error");
-            }
-        }
-
-        async function listFiles() {
-            const prefix = document.getElementById("prefixInput").value;
-            const listLoader = document.getElementById("listLoader");
-            const fileListEl = document.getElementById("fileList");
-            const messageEl = document.getElementById("message");
-            
-            // Show loader
-            listLoader.style.display = "block";
-            fileListEl.innerHTML = "";
-            messageEl.textContent = "";
-            messageEl.className = "";
-            
-            try {
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ action: "list_files", prefix })
-                });
-                
-                const data = await response.json();
-                // Hide loader
-                listLoader.style.display = "none";
-                
-                if (data.files && data.files.length > 0) {
-                    data.files.forEach(file => {
-                        const fileItem = document.createElement('div');
-                        fileItem.className = 'file-list-item';
-                        fileItem.innerHTML = `
-                            <a href="#" onclick="getPresignedUrlForFile('${file}')">${file}</a>
-                            <span>(Click to get presigned URL)</span>
-                        `;
-                        fileListEl.appendChild(fileItem);
-                    });
-                } else {
-                    fileListEl.innerHTML = '<div class="file-list-item">No files found.</div>';
-                }
-            } catch (error) {
-                listLoader.style.display = "none";
-                showMessage("An error occurred: " + error.message, "error");
-            }
-        }
-        
-        async function getPresignedUrlForFile(fileName) {
-            const response = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action: "get_presigned_url", fileName })
-            });
-            
-            const data = await response.json();
-            if (data.presignedUrl) {
-                window.open(data.presignedUrl, '_blank');
-            } else {
-                showMessage(data.error, "error");
             }
         }
         
